@@ -3,11 +3,13 @@
 const net = require('net');
 const fs = require('fs');
 
-const indexHTML = fs.readFileSync('./public/index.html');
-const hydrogenHTML = fs.readFileSync('./public/hydrogen.html');
-const heliumHTML = fs.readFileSync('./public/helium.html');
-const error404 = fs.readFileSync('./public/404.html');
-const cssStyles = fs.readFileSync('./public/css/styles.css');
+const fetchHtmlFiles = (fileName) => fs.readFileSync(fileName);
+
+const indexHTML = fetchHtmlFiles('./public/index.html');
+const hydrogenHTML = fetchHtmlFiles('./public/hydrogen.html');
+const heliumHTML = fetchHtmlFiles('./public/helium.html');
+const error404 = fetchHtmlFiles('./public/404.html');
+const cssStyles = fetchHtmlFiles('./public/css/styles.css');
 
 const server = net.createServer( (request) => {
   request.on('data', (data) => {
@@ -17,49 +19,52 @@ const server = net.createServer( (request) => {
 
     switch (path) {
       case '/':
-      request.write(writeHeader('200 OK', 'text/html', indexHTML));
-      request.end();
-
-      break;
-
+      case '/index':
       case '/index.html':
-      request.write(writeHeader('200 OK', 'text/html', indexHTML));
+      writeHeader(request, '200 OK', 'text/html', indexHTML);
       request.end();
       break;
 
+      case '/hydrogen':
       case '/hydrogen.html':
-      request.write(writeHeader('200 OK', 'text/html', hydrogenHTML));
+      writeHeader(request, '200 OK', 'text/html', hydrogenHTML);
       request.end();
       break;
 
+      case '/helium':
       case '/helium.html':
-      request.write(writeHeader('200 OK', 'text/html', heliumHTML));
+      writeHeader(request, '200 OK', 'text/html', heliumHTML);
       request.end();
       break;
 
       case '/public/css/styles.css':
-      request.write(writeHeader('200 OK', 'text/css', cssStyles));
+      writeHeader(request, '200 OK', 'text/css', cssStyles);
+      request.end();
+      break;
+
+      case './public/404':
+      case './public/404.html':
+      writeHeader(request, '200 OK', 'text/html', error404);
       request.end();
       break;
 
       default:
-      request.write(writeHeader('404 BAD_REQUEST', 'text/html', error404));
+      writeHeader(request, '404 BAD_REQUEST', 'text/html', error404);
       request.end();
     }
   });
 });
 
-function writeHeader(status, fileType, fileName) {
-  return `HTTP/1.1 ${status}
+const writeHeader = (request, status, fileType, fileName) => {
+  request.write(`HTTP/1.1 ${status}
 Server: Mellanie's Super Awesome Server
 Date: ${new Date().toUTCString()};
 Content-Type: ${fileType}; charset=utf-8
 Content-Length: ${fileName.length}
 Connection: keep-alive
 
-${fileName}`;
-}
+${fileName}`);
+};
 
-server.listen(8080, () => {
-  console.log(`Server listening on port 8080`);
-});
+
+server.listen(8080, () => console.log(`Server listening on port 8080`));
