@@ -37,13 +37,13 @@ const server = net.createServer( (request) => {
       request.end();
       break;
 
-      case '/public/css/styles.css':
+      case '/css/styles.css':
       writeHeader(request, '200 OK', 'text/css', cssStyles);
       request.end();
       break;
 
-      case './public/404':
-      case './public/404.html':
+      case '404':
+      case '404.html':
       writeHeader(request, '200 OK', 'text/html', error404);
       request.end();
       break;
